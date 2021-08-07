@@ -10,7 +10,7 @@ The latter behavior requires a memory footprint double that of a usual instance
 If an attribute name is found both in the class and in an instance, the class value takes priority
 
 Iteration order is dictated by the derived class's MRO
-The relevant MRO starts after this class, allowing some parents to be excluded from the merge
+The traversed MRO starts after this class, allowing earlier parents to be excluded from the merge
 If no parent contains the desired attribute, default __getattribute__ behavior resumes for the derived class
 
 Examples are included in this package's examples.py
@@ -28,6 +28,7 @@ class Merger:
                 break
 
         # Create parent instances to use before the actual constructor
+        # All parent classes must be cooperative (or just take no args) for this to work
         its = []
         for cls in mro:
             if cls is not object:
@@ -41,7 +42,7 @@ class Merger:
         self.__func = func if func is not None else lambda x, y: y
 
     def __getattribute__(self, name):
-        # Find all viable attributes from the list of __dict__'s
+        # Find all viable attributes using the saved instances
         attrs = {}
         for it in object.__getattribute__(self, "_Merger__its"):
             try:
