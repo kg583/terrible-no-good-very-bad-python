@@ -27,7 +27,7 @@ class Merger:
             if cls is Merger:
                 break
 
-        # Create the parent instances to use before the actual constructor
+        # Create parent instances to use before the actual constructor
         its = []
         for cls in mro:
             if cls is not object:
@@ -37,7 +37,7 @@ class Merger:
         super().__init__(*args, **kwargs)
         self.__its = its
 
-        # Set the default reductive behavior
+        # Set the default merge behavior
         self.__func = func if func is not None else lambda x, y: y
 
     def __getattribute__(self, name):
@@ -58,26 +58,30 @@ class Merger:
             attrs[it] = attr
 
         if attrs:
-            # Get the merge function
+            # Get the merging function
             func = object.__getattribute__(self, "_Merger__func")
 
             if all(hasattr(attr, "__call__") or hasattr(attr, "__func__") for attr in attrs.values()):
                 # If EVERY attribute can be called, return a function that reduces with whatever arguments
-                # Arity does not NEED to match but it probably should
+                # Arity does not need to match between methods
                 def merger(*args, **kwargs):
                     def passer(t):
                         k, v = t
                         try:
+                            # The method is static
                             return v(*args, **kwargs)
                         except TypeError:
+                            # The method is regular or class
                             return v(k, *args, **kwargs)
 
                     return reduce(func, map(passer, attrs.items()))
 
                 return merger
             else:
-                # If just one attribute is not a function, return the reduction
+                # If at least one attribute is not a function, return the reduction
+                # This technically permits mixing fields and methods
                 return reduce(func, attrs.values())
         else:
             # Fallback to the default __getattribute__ behavior
+            # Calling object's __getattribute__ is technically safer, but the other parents could theoretically override it as well
             return super().__getattribute__(self, name)
