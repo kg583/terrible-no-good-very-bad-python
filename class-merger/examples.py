@@ -1,20 +1,7 @@
 import class_merger import Merger
 
 
-class Soap:
-    @staticmethod
-    def shave(yak):
-        print(f"Washing {yak}!")
 
-
-class Shears:
-    @staticmethod
-    def shave(yak):
-        print(f"Shearing {yak}!")
-        
-        
-class YakBarber(Merger, Soap, Shears):
-    pass
 
 
 tenzing = YakBarber()
@@ -22,6 +9,7 @@ tenzing.shave("Yakety Sax")
 
 """
 >>> Washing Yakety Sax!
+>>> Rinsing Yakety Sax!
 >>> Shearing Yakety Sax!
 """
 
@@ -50,9 +38,18 @@ class Sum(Merger, One, Two, Three):
         super().__init__(func=lambda x, y: x + y)
         
         
+class SkipSum(One, Merger, Two, Three):
+    def __init__(self):
+        Merger.__init__(self, func=lambda x, y: x + y)
+        
+        
 gauss = Sum()
 print(gauss.value)
 
+gauss_but_dumber = SkipSum()
+print(gauss_but_dumber.value)
+
 """
 >>> 6
+>>> 5
 """
