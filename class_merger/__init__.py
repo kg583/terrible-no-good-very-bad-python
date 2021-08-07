@@ -28,7 +28,7 @@ class Merger:
                 break
 
         # Create parent instances to use before the actual constructor
-        # All parent classes must be cooperative (or just take no args) for this to work
+        # All parent classes must be cooperative (or just take the same args) for this to work
         its = []
         for cls in mro:
             if cls is not object:
@@ -62,7 +62,7 @@ class Merger:
             # Get the merging function
             func = object.__getattribute__(self, "_Merger__func")
 
-            if all(hasattr(attr, "__call__") or hasattr(attr, "__func__") for attr in attrs.values()):
+            if all(hasattr(attr, "__call__") for attr in attrs.values()):
                 # If EVERY attribute can be called, return a function that reduces with whatever arguments
                 # Arity does not need to match between methods
                 def merger(*args, **kwargs):
