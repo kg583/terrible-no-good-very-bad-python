@@ -17,6 +17,7 @@ Examples are included in this package's examples.py
 """
 from functools import reduce
 
+
 class Merger:
     def __init__(self, *args, func=None, **kwargs):
         # Get the MRO as an iterator
@@ -26,54 +27,57 @@ class Merger:
             if cls is Merger:
                 break
 
-        # Get the __dict__'s for instances AND classes in the MRO
-        dicts = []
+        # Create the parent instances to use before the actual constructor
+        its = []
         for cls in mro:
-            try:
-                # These instances are all created again by the actual constructor, oh well
-                it = cls(*args, **kwargs)
-                dct = it.__dict__
-                del it
-                try:
-                    # Class attributes take precedence is they exist
-                    dct.update(cls.__dict__)
-                except AttributeError:
-                    pass
-                dicts.append(dct)
-            except AttributeError:
-                pass
+            if cls is not object:
+                its.append(cls(*args, **kwargs))
 
         # Continue the initialization chain
         super().__init__(*args, **kwargs)
-        self.__dicts = dicts
-        
+        self.__its = its
+
         # Set the default reductive behavior
         self.__func = func if func is not None else lambda x, y: y
 
     def __getattribute__(self, name):
         # Find all viable attributes from the list of __dict__'s
-        attrs = []
-        for dct in object.__getattribute__(self, "_Merger__dicts"):
+        attrs = {}
+        for it in object.__getattribute__(self, "_Merger__its"):
             try:
-                attr = dct[name]
-                try:
-                    # Get the function part of a static method if necessary
-                    attrs.append(attr.__func__)
-                except AttributeError:
-                    attrs.append(attr)
+                # Try the class first
+                attr = getattr(it.__class__, name)
             except KeyError:
-                # Don't worry if a parent lacks the attribute
-                pass
+                # Try the instance next
+                try:
+                    attr = getattr(it, name)
+                except AttributeError:
+                    # Guess it's not here
+                    continue
 
-        func = object.__getattribute__(self, "_Merger__func")
+            attrs[it] = attr
+
         if attrs:
-            if all(hasattr(attr, "__call__") for attr in attrs):
+            # Get the merge function
+            func = object.__getattribute__(self, "_Merger__func")
+
+            if all(hasattr(attr, "__call__") or hasattr(attr, "__func__") for attr in attrs.values()):
                 # If EVERY attribute can be called, return a function that reduces with whatever arguments
-                return lambda *args, **kwargs: reduce(func, map(lambda meth: meth(*args, **kwargs), attrs))
+                # Arity does not NEED to match but it probably should
+                def merger(*args, **kwargs):
+                    def passer(t):
+                        k, v = t
+                        try:
+                            return v(*args, **kwargs)
+                        except TypeError:
+                            return v(k, *args, **kwargs)
+
+                    return reduce(func, map(passer, attrs.items()))
+
+                return merger
             else:
                 # If just one attribute is not a function, return the reduction
-                return reduce(func, attrs)
+                return reduce(func, attrs.values())
         else:
             # Fallback to the default __getattribute__ behavior
-            # Using object would be safer, but a parent could theoretically also redefine this
             return super().__getattribute__(self, name)
