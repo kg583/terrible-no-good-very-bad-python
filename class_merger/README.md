@@ -12,7 +12,7 @@ It was not easy peezy. As you can see by inspection, the code to run down the MR
 
 Despite its obvious abhorrent nature to any moderately-seasoned Python programmer, this package does what it says on the tin, and quite well. The majority of edge cases can really only arise by engaging in this level of class hacking yourself. Most importantly, though, casual use of this package advocates for the general concept of "additive' or "merged" inheritance in a natural way. Container classes or similar patterns are usually the solution when presented with such a conundrum, but have two big flaws:
 
-1. Sometimes containers can't be used, as in the case of deriving from a base class you have no access to but must be able to implement by the end
+1. Sometimes containers can't be used, as in the case of deriving from a base class you have no access to but must be able to implement by the end.
 2. Containers miss the point of organizing methods this way in the first place: the derived class does not "contain" or "wrap" its component classes; it *is* its component classes put together.
 
 I would be interested in exploring this strange flavor of OOP in the future, and perhaps have been beaten to the punch by some language I'm not familiar with. But for now, we must live with terrible code to do terrible things, until the presence of elegant code makes those same things elegant too.
