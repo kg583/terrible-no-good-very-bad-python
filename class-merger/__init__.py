@@ -47,7 +47,7 @@ class Merger:
             try:
                 # Try the class first
                 attr = getattr(it.__class__, name)
-            except KeyError:
+            except AttributeError:
                 # Try the instance next
                 try:
                     attr = getattr(it, name)
