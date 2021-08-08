@@ -81,14 +81,14 @@ class First:
         print("I will run first")
 
     @staticmethod
-    @last
+    @merge_last
     def last():
         print("I will definitely run last")
 
 
 class Last:
     @staticmethod
-    @first
+    @merge_first
     def first():
         print("I will definitely run first")
 

@@ -104,7 +104,7 @@ class Merger:
             return super().__getattribute__(self, name)
 
 
-def first(func):
+def merge_first(func):
     """
     Decorator which pushes class methods to the front of the call order, regardless of position in the MRO.
     Precedence between multiple decorated methods then falls back to the MRO.
@@ -113,7 +113,7 @@ def first(func):
     return func
 
 
-def last(func):
+def merge_last(func):
     """
     Decorator which pushes class methods to the end of the call order, regardless of position in the MRO.
     Precedence between multiple decorated methods then falls back to the MRO.
