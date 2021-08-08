@@ -1,4 +1,4 @@
-import class_merger import Merger
+from class_merger import Merger
 
 
 class Soap:
@@ -33,22 +33,24 @@ tenzing.shave("Yakety Sax")
 
 
 class One:
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.value = 1
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
 
 class Two:
     value = 2
-    def __init__(self):
-        super().__init__()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class Three:
     value = 3
-    def __init__(self):
+
+    def __init__(self, *args, **kwargs):
         self.value = 4
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
 
 class Sum(Merger, One, Two, Three):
@@ -58,7 +60,7 @@ class Sum(Merger, One, Two, Three):
 
 class SkipSum(One, Merger, Two, Three):
     def __init__(self):
-        Merger.__init__(self, func=lambda x, y: x + y)
+        super().__init__(func=lambda x, y: x + y)
 
 
 gauss = Sum()
