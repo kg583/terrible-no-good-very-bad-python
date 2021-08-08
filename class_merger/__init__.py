@@ -1,25 +1,39 @@
 """
-A mixin class to "merge" the behavior of multiple parent classes
+A mixin class to "merge" the behavior of multiple parent classes.
 
-Attributes of the parents with the same name are combined using a function of choice via functools.reduce
-The default behavior is to call all parent attributes and return the final value
-This contrasts the standard OOP behavior of overriding the desired attribute with the first viable parent
+Attributes of the parents with the same name are combined using a function of choice via functools.reduce.
+The default behavior is to call all parent attributes and return the final value.
+This contrasts the standard OOP behavior of overriding the desired attribute with the first viable parent.
 
-Class attributes are searched first, followed by instance attributes
-The latter behavior requires a memory footprint double that of a usual instance
-If an attribute name is found both in the class and in an instance, the class value takes priority
+Class attributes are searched first, followed by instance attributes.
+The latter behavior requires a memory footprint double that of a usual instance.
+If an attribute name is found both in the class and in an instance, the class value takes priority.
 
-Iteration order is dictated by the derived class's MRO
-The traversed MRO starts after this class, allowing earlier parents to be excluded from the merge
-If no parent contains the desired attribute, default __getattribute__ behavior resumes for the derived class
+Iteration order is dictated by the derived class's MRO.
+The traversed MRO starts after this class, allowing earlier parents to be excluded from the merge.
+If no parent contains the desired attribute, default __getattribute__ behavior resumes for the derived class.
 
-Examples are included in this package's examples.py
+Examples are included in this package's examples.py.
 """
 from functools import reduce
 
 
 class Merger:
-    def __init__(self, *args, func=None, **kwargs):
+    """
+    Merges parent classes by combining identically-named attributes in a specified way.
+    Only parents further up the MRO than this class are merged.
+    """
+    def __init__(self, *args, func=None, ignores=None, use_instances=False, **kwargs):
+        """
+        Initializes this class, passing unused arguments upstream.
+
+        :param func: A function of two arguments with a single return used to combine parent attributes.
+                     The default value of None corresponds to the function which returns its second argument
+        :param ignores: An iterable of classes to ignore when merging (can be empty or None)
+        :param use_instances: A boolean dictating whether instance attributes are merged
+                              If set to True, copies of each parent instance are kept in memory for future look-up
+                              By default, instance attributes are not merged
+        """
         # Get the MRO as an iterator
         # This pattern is roughly how super() works
         mro = iter(object.__getattribute__(self, "__class__").__mro__)
@@ -29,14 +43,15 @@ class Merger:
 
         # Create parent instances to use before the actual constructor
         # All parent classes must be cooperative (or just take the same args) for this to work
-        its = []
+        clits = []
         for cls in mro:
-            if cls is not object:
-                its.append(cls(*args, **kwargs))
+            if all(cls is not ignore for ignore in tuple(ignores if ignores is not None else ()) + (object,)):
+                # This pattern expects cooperative parents
+                clits.append((cls, cls(*args, **kwargs) if use_instances else None))
 
         # Continue the initialization chain
         super().__init__(*args, **kwargs)
-        self.__its = its
+        self.__clits = clits
 
         # Set the default merge behavior
         self.__func = func if func is not None else lambda x, y: y
@@ -44,10 +59,10 @@ class Merger:
     def __getattribute__(self, name):
         # Find all viable attributes using the saved instances
         attrs = {}
-        for it in object.__getattribute__(self, "_Merger__its"):
+        for cls, it in object.__getattribute__(self, "_Merger__clits"):
             try:
                 # Try the class first
-                attr = getattr(it.__class__, name)
+                attr = getattr(cls, name)
             except AttributeError:
                 # Try the instance next
                 try:
@@ -56,7 +71,7 @@ class Merger:
                     # Guess it's not here
                     continue
 
-            attrs[it] = attr
+            attrs[cls] = attr
 
         if attrs:
             # Get the merging function
@@ -84,5 +99,5 @@ class Merger:
                 return reduce(func, attrs.values())
         else:
             # Fallback to the default __getattribute__ behavior
-            # Calling object's __getattribute__ is technically safer, but the other parents could theoretically override it as well
+            # Calling from object is technically safer, but the other parents could theoretically override it as well
             return super().__getattribute__(self, name)
