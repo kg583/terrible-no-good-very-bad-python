@@ -28,11 +28,11 @@ class Merger:
         Initializes this class, passing unused arguments upstream.
 
         :param func: A function of two arguments with a single return used to combine parent attributes.
-                     The default value of None corresponds to the function which returns its second argument
-        :param ignores: An iterable of classes to ignore when merging (can be empty or None)
-        :param use_instances: A boolean dictating whether instance attributes are merged
-                              If set to True, copies of each parent instance are kept in memory for future look-up
-                              By default, instance attributes are not merged
+                     The default value of None corresponds to the function which returns its second argument.
+        :param ignores: An iterable of classes to ignore when merging (can be empty or None).
+        :param use_instances: A boolean dictating whether instance attributes are merged.
+                              If set to True, copies of each parent instance are kept in memory for future look-up.
+                              By default, instance attributes are not merged.
         """
         # Get the MRO as an iterator
         # This pattern is roughly how super() works
