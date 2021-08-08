@@ -58,7 +58,7 @@ class Merger:
 
     def __getattribute__(self, name):
         # Find all viable attributes using the saved instances
-        attrs = {}
+        attrs = [[], [], []]
         for cls, it in object.__getattribute__(self, "_Merger__clits"):
             try:
                 # Try the class first
@@ -71,8 +71,9 @@ class Merger:
                     # Guess it's not here
                     continue
 
-            attrs[cls] = attr
+            attrs[getattr(attr, "__merge_order__", 1)] += [(cls, attr)]
 
+        attrs = dict(reduce(lambda x, y: x + y, attrs))
         if attrs:
             # Get the merging function
             func = object.__getattribute__(self, "_Merger__func")
@@ -101,3 +102,21 @@ class Merger:
             # Fallback to the default __getattribute__ behavior
             # Calling from object is technically safer, but the other parents could theoretically override it as well
             return super().__getattribute__(self, name)
+
+
+def first(func):
+    """
+    Decorator which pushes class methods to the front of the call order, regardless of position in the MRO.
+    Precedence between multiple decorated methods then falls back to the MRO.
+    """
+    func.__merge_order__ = 0
+    return func
+
+
+def last(func):
+    """
+    Decorator which pushes class methods to the end of the call order, regardless of position in the MRO.
+    Precedence between multiple decorated methods then falls back to the MRO.
+    """
+    func.__merge_order__ = -1
+    return func

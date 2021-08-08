@@ -1,4 +1,4 @@
-from __init__ import Merger
+from __init__ import *
 
 
 class Soap:
@@ -72,4 +72,42 @@ print(gauss_but_dumber.value)
 """
 >>> 6
 >>> 2
+"""
+
+
+class First:
+    @staticmethod
+    def first():
+        print("I will run first")
+
+    @staticmethod
+    @last
+    def last():
+        print("I will definitely run last")
+
+
+class Last:
+    @staticmethod
+    @first
+    def first():
+        print("I will definitely run first")
+
+    @staticmethod
+    def last():
+        print("I will run last")
+
+
+class Runner(Merger, First, Last):
+    pass
+
+
+kipchoge = Runner()
+kipchoge.first()
+kipchoge.last()
+
+"""
+>>> I will definitely run first
+>>> I will run first
+>>> I will run last
+>>> I will definitely run last
 """
