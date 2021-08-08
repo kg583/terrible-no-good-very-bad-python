@@ -57,22 +57,24 @@ class Merger:
         self.__func = func if func is not None else lambda x, y: y
 
     def __getattribute__(self, name):
-        # Find all viable attributes using the saved instances
+        # Partition attributes into first, default, and last sections of the call order
         attrs = [[], [], []]
         for cls, it in object.__getattribute__(self, "_Merger__clits"):
             try:
                 # Try the class first
                 attr = getattr(cls, name)
             except AttributeError:
-                # Try the instance next
+                # Try the instance next (will be None if use_instances is False)
                 try:
                     attr = getattr(it, name)
                 except AttributeError:
                     # Guess it's not here
                     continue
 
+            # Store the desired attribute in the appropriate section
             attrs[getattr(attr, "__merge_order__", 1)] += [(cls, attr)]
 
+        # Unite the sections to get the final call order
         attrs = dict(reduce(lambda x, y: x + y, attrs))
         if attrs:
             # Get the merging function
