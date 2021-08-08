@@ -18,7 +18,7 @@ class Shears:
         print(f"Shearing {yak}!")
 
 
-class YakBarber(Merger, Soap, Water, Shears):
+class YakBarber(MixinMerger, Soap, Water, Shears):
     pass
 
 
@@ -53,12 +53,12 @@ class Three:
         super().__init__(*args, **kwargs)
 
 
-class Sum(Merger, One, Two, Three):
+class Sum(MixinMerger, One, Two, Three):
     def __init__(self):
         super().__init__(func=lambda x, y: x + y, use_instances=True)
 
 
-class SkipSum(One, Merger, Two, Three):
+class SkipSum(One, MixinMerger, Two, Three):
     def __init__(self):
         super().__init__(func=lambda x, y: x + y, ignores=(Three,), use_instances=True)
 
@@ -97,7 +97,7 @@ class Last:
         print("I will run last")
 
 
-class Runner(Merger, First, Last):
+class Runner(MixinMerger, First, Last):
     pass
 
 

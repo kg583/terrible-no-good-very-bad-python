@@ -1,17 +1,7 @@
 """
-A mixin class to "merge" the behavior of multiple parent classes.
+Mixin class and metaclass frameworks for "merging" multiple parent classes, overriding default inheritance behavior.
 
-Attributes of the parents with the same name are combined using a function of choice via functools.reduce.
-The default behavior is to call all parent attributes and return the final value.
-This contrasts the standard OOP behavior of overriding the desired attribute with the first viable parent.
-
-Class attributes are searched first, followed by instance attributes.
-The latter behavior requires a memory footprint double that of a usual instance.
-If an attribute name is found both in the class and in an instance, the class value takes priority.
-
-Iteration order is dictated by the derived class's MRO.
-The traversed MRO starts after this class, allowing earlier parents to be excluded from the merge.
-If no parent contains the desired attribute, default __getattribute__ behavior resumes for the derived class.
+Details for each framework are given in their respective docs.
 
 Examples are included in this package's examples.py.
 """
@@ -19,10 +9,21 @@ from functools import reduce
 import operator
 
 
-class Merger:
+class MixinMerger:
     """
-    Merges parent classes by combining identically-named attributes in a specified way.
-    Only parents further up the MRO than this class are merged.
+    A mixin class to "merge" the behavior of multiple parent classes.
+
+    Attributes of the parents with the same name are combined using a function of choice via functools.reduce.
+    The default behavior is to call all parent attributes and return the final value.
+    This contrasts the standard OOP behavior of overriding the desired attribute with the first viable parent.
+
+    Class attributes are searched first, followed by instance attributes.
+    The latter behavior requires a memory footprint double that of a usual instance.
+    If an attribute name is found both in the class and in an instance, the class value takes priority.
+
+    Iteration order is dictated by the derived class's MRO.
+    The traversed MRO starts after this class, allowing earlier parents to be excluded from the merge.
+    If no parent contains the desired attribute, default __getattribute__ behavior resumes for the derived class.
     """
     def __init__(self, *args, func=None, ignores=None, use_instances=False, **kwargs):
         """
@@ -39,7 +40,7 @@ class Merger:
         # This pattern is roughly how super() works
         mro = iter(object.__getattribute__(self, "__class__").__mro__)
         for cls in mro:
-            if cls is Merger:
+            if cls is MixinMerger:
                 break
 
         # Create parent instances to use before the actual constructor
@@ -60,7 +61,7 @@ class Merger:
     def __getattribute__(self, name):
         # Partition attributes into first, default, and last sections of the call order
         attrs = [[], [], []]
-        for cls, it in object.__getattribute__(self, "_Merger__clits"):
+        for cls, it in object.__getattribute__(self, "_MixinMerger__clits"):
             try:
                 # Try the class first
                 attr = getattr(cls, name)
@@ -79,7 +80,7 @@ class Merger:
         attrs = dict(reduce(operator.add, attrs))
         if attrs:
             # Get the merging function
-            func = object.__getattribute__(self, "_Merger__func")
+            func = object.__getattribute__(self, "_MixinMerger__func")
 
             if all(hasattr(attr, "__call__") for attr in attrs.values()):
                 # If EVERY attribute can be called, return a function that reduces with whatever arguments
