@@ -1,4 +1,4 @@
-from class_merger import Merger
+from __init__ import Merger
 
 
 class Soap:
@@ -55,12 +55,12 @@ class Three:
 
 class Sum(Merger, One, Two, Three):
     def __init__(self):
-        super().__init__(func=lambda x, y: x + y)
+        super().__init__(func=lambda x, y: x + y, use_instances=True)
 
 
 class SkipSum(One, Merger, Two, Three):
     def __init__(self):
-        super().__init__(func=lambda x, y: x + y)
+        super().__init__(func=lambda x, y: x + y, ignores=(Three,), use_instances=True)
 
 
 gauss = Sum()
@@ -71,5 +71,5 @@ print(gauss_but_dumber.value)
 
 """
 >>> 6
->>> 5
+>>> 2
 """
