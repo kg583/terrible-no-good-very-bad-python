@@ -16,6 +16,7 @@ If no parent contains the desired attribute, default __getattribute__ behavior r
 Examples are included in this package's examples.py.
 """
 from functools import reduce
+import operator
 
 
 class Merger:
@@ -75,7 +76,7 @@ class Merger:
             attrs[getattr(attr, "__merge_order__", 1)] += [(cls, attr)]
 
         # Unite the sections to get the final call order
-        attrs = dict(reduce(lambda x, y: x + y, attrs))
+        attrs = dict(reduce(operator.add, attrs))
         if attrs:
             # Get the merging function
             func = object.__getattribute__(self, "_Merger__func")
