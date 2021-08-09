@@ -56,34 +56,33 @@ class MixinMerger:
                 continue
 
             # Store the desired attribute in the appropriate section
-            attrs[getattr(attr, "__merge_order__", 1)] += [(cls, attr)]
+            attrs[getattr(attr, "__merge_order__", 1)] += [attr]
 
         # Unite the sections to get the final call order
-        attrs = dict(reduce(operator.add, attrs))
+        attrs = reduce(operator.add, attrs)
         if attrs:
             # Get the merging function
             func = object.__getattribute__(self, "_MixinMerger__func")
 
-            if all(hasattr(attr, "__call__") for attr in attrs.values()):
+            if all(hasattr(attr, "__call__") for attr in attrs):
                 # If EVERY attribute can be called, return a function that reduces with whatever arguments
                 # Arity does not need to match between methods
                 def merger(*args, **kwargs):
-                    def passer(t):
-                        k, v = t
+                    def passer(a):
                         try:
                             # The method is static
-                            return v(*args, **kwargs)
+                            return a(*args, **kwargs)
                         except TypeError:
-                            # The method is regular or class
-                            return v(k, *args, **kwargs)
+                            # The method needs an instance
+                            return a(self, *args, **kwargs)
 
-                    return reduce(func, map(passer, attrs.items()))
+                    return reduce(func, map(passer, attrs))
 
                 return merger
             else:
                 # If at least one attribute is not a function, return the reduction
                 # This technically permits mixing fields and methods
-                return reduce(func, attrs.values())
+                return reduce(func, attrs)
         else:
             # Fallback to the default __getattribute__ behavior
             # Calling from object is technically safer, but the other parents could theoretically override it as well
