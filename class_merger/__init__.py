@@ -105,3 +105,6 @@ def merge_last(func):
     """
     func.__merge_order = -1
     return func
+
+
+__all__ = [Merger, merge_first, merge_last]
