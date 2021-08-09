@@ -1,8 +1,6 @@
 """
 Mixin class framework for "merging" multiple parent classes, overriding default inheritance behavior.
 
-Details for each framework are given in their respective docs.
-
 Examples are included in this package's examples.py.
 """
 from functools import reduce
