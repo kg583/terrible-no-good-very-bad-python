@@ -56,7 +56,7 @@ class MixinMerger:
                 continue
 
             # Store the desired attribute in the appropriate section
-            attrs[getattr(attr, "__merge_order__", 1)] += [attr]
+            attrs[getattr(attr, "__merge_order", 1)] += [attr]
 
         # Unite the sections to get the final call order
         attrs = reduce(operator.add, attrs)
@@ -94,7 +94,7 @@ def merge_first(func):
     Decorator which pushes class methods to the front of the call order, regardless of position in the MRO.
     Precedence between multiple decorated methods then falls back to the MRO.
     """
-    func.__merge_order__ = 0
+    func.__merge_order = 0
     return func
 
 
@@ -103,5 +103,5 @@ def merge_last(func):
     Decorator which pushes class methods to the end of the call order, regardless of position in the MRO.
     Precedence between multiple decorated methods then falls back to the MRO.
     """
-    func.__merge_order__ = -1
+    func.__merge_order = -1
     return func
