@@ -47,7 +47,7 @@ class Merger:
     def __getattribute__(self, name):
         # Partition attributes into first, default, and last sections of the call order
         attrs = [[], [], []]
-        for cls in object.__getattribute__(self, "_MixinMerger__mro"):
+        for cls in object.__getattribute__(self, "_Merger__mro"):
             try:
                 # Try the class first
                 attr = getattr(cls, name)
@@ -62,7 +62,7 @@ class Merger:
         attrs = reduce(operator.add, attrs)
         if attrs:
             # Get the merging function
-            func = object.__getattribute__(self, "_MixinMerger__func")
+            func = object.__getattribute__(self, "_Merger__func")
 
             if all(hasattr(attr, "__call__") for attr in attrs):
                 # If EVERY attribute can be called, return a function that reduces with whatever arguments
