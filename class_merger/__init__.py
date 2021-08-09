@@ -1,5 +1,5 @@
 """
-Mixin class and metaclass frameworks for "merging" multiple parent classes, overriding default inheritance behavior.
+Mixin class framework for "merging" multiple parent classes, overriding default inheritance behavior.
 
 Details for each framework are given in their respective docs.
 
@@ -9,7 +9,7 @@ from functools import reduce
 import operator
 
 
-class MixinMerger:
+class Merger:
     """
     A mixin class to "merge" the behavior of multiple parent classes.
 
@@ -33,7 +33,7 @@ class MixinMerger:
         # This pattern is roughly how super() works
         mro = iter(object.__getattribute__(self, "__class__").__mro__)
         for cls in mro:
-            if cls is MixinMerger:
+            if cls is Merger:
                 break
         mro = [cls for cls in mro if cls not in tuple(ignores or ()) + (object,)]
 
