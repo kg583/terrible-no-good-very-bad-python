@@ -42,46 +42,48 @@ class Merger:
         self.__func = func or (lambda x, y: y)
         self.__mro = mro
 
-    def __getattribute__(self, name):
-        # Partition attributes into first, default, and last sections of the call order
-        attrs = [[], [], []]
-        for cls in object.__getattribute__(self, "_Merger__mro"):
-            try:
-                # Try the class first
-                attr = getattr(cls, name)
-            except AttributeError:
-                # Guess it's not here
-                continue
+    def __getattribute__(self, name: str):
+        # Ignore magic names
+        if not name.startswith("__"):
+            # Partition attributes into first, default, and last sections of the call order
+            attrs = [[], [], []]
+            for cls in object.__getattribute__(self, "_Merger__mro"):
+                try:
+                    # Try the class first
+                    attr = getattr(cls, name)
+                except AttributeError:
+                    # Guess it's not here
+                    continue
 
-            # Store the desired attribute in the appropriate section
-            attrs[getattr(attr, "__merge_order", 1)] += [attr]
+                # Store the desired attribute in the appropriate section
+                attrs[getattr(attr, "__merge_order", 1)] += [attr]
 
-        # Unite the sections to get the final call order
-        attrs = reduce(operator.add, attrs)
-        if attrs:
-            # Get the merging function
-            func = object.__getattribute__(self, "_Merger__func")
+            # Unite the sections to get the final call order
+            attrs = reduce(operator.add, attrs)
+            if attrs:
+                # Get the merging function
+                func = object.__getattribute__(self, "_Merger__func")
 
-            if all(hasattr(attr, "__call__") for attr in attrs):
-                # If EVERY attribute can be called, return a function that reduces with whatever arguments
-                # Arity does not need to match between methods
-                def merger(*args, **kwargs):
-                    def passer(a):
-                        try:
-                            # The method is static
-                            return a(*args, **kwargs)
-                        except TypeError:
-                            # The method needs an instance
-                            return a(self, *args, **kwargs)
+                if all(hasattr(attr, "__call__") for attr in attrs):
+                    # If EVERY attribute can be called, return a function that reduces with whatever arguments
+                    # Arity does not need to match between methods
+                    def merger(*args, **kwargs):
+                        def passer(a):
+                            try:
+                                # The method is static
+                                return a(*args, **kwargs)
+                            except TypeError:
+                                # The method needs an instance
+                                return a(self, *args, **kwargs)
 
-                    return reduce(func, map(passer, attrs))
+                        return reduce(func, map(passer, attrs))
 
-                return merger
-            else:
-                # If at least one attribute is not a function, return the reduction
-                # This technically permits mixing fields and methods
-                return reduce(func, attrs)
-        else:
+                    return merger
+                else:
+                    # If at least one attribute is not a function, return the reduction
+                    # This technically permits mixing fields and methods
+                    return reduce(func, attrs)
+
             # Fallback to the default __getattribute__ behavior
             # Calling from object is technically safer, but the other parents could theoretically override it as well
             return super().__getattribute__(self, name)
