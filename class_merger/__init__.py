@@ -105,4 +105,4 @@ def merge_last(func):
     return func
 
 
-__all__ = [Merger, merge_first, merge_last]
+__all__ = ["Merger", "merge_first", "merge_last"]
