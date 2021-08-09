@@ -39,10 +39,10 @@ class MixinMerger:
 
         # Continue the initialization chain
         super().__init__(*args, **kwargs)
-        self.__mro = mro
 
         # Set the default merge behavior
         self.__func = func or (lambda x, y: y)
+        self.__mro = mro
 
     def __getattribute__(self, name):
         # Partition attributes into first, default, and last sections of the call order

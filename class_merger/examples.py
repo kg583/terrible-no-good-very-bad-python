@@ -33,8 +33,9 @@ tenzing.shave("Yakety Sax")
 
 
 class One:
+    value = 1
+
     def __init__(self, *args, **kwargs):
-        self.value = 1
         super().__init__(*args, **kwargs)
 
 
@@ -55,12 +56,12 @@ class Three:
 
 class Sum(MixinMerger, One, Two, Three):
     def __init__(self):
-        super().__init__(func=lambda x, y: x + y, use_instances=True)
+        super().__init__(func=lambda x, y: x + y)
 
 
 class SkipSum(One, MixinMerger, Two, Three):
     def __init__(self):
-        super().__init__(func=lambda x, y: x + y, ignores=(Three,), use_instances=True)
+        super().__init__(func=lambda x, y: x + y, ignores=(Three,))
 
 
 gauss = Sum()
