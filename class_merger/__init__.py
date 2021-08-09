@@ -13,28 +13,21 @@ class MixinMerger:
     """
     A mixin class to "merge" the behavior of multiple parent classes.
 
-    Attributes of the parents with the same name are combined using a function of choice via functools.reduce.
+    Class attributes of the parents with the same name are combined using a function of choice via functools.reduce.
     The default behavior is to call all parent attributes and return the final value.
     This contrasts the standard OOP behavior of overriding the desired attribute with the first viable parent.
 
-    Class attributes are searched first, followed by instance attributes.
-    The latter behavior requires a memory footprint double that of a usual instance.
-    If an attribute name is found both in the class and in an instance, the class value takes priority.
-
     Iteration order is dictated by the derived class's MRO.
     The traversed MRO starts after this class, allowing earlier parents to be excluded from the merge.
-    If no parent contains the desired attribute, default __getattribute__ behavior resumes for the derived class.
+    If no parent contains the desired attribute, super __getattribute__ behavior resumes for the derived class.
     """
-    def __init__(self, *args, func=None, ignores=None, use_instances=False, **kwargs):
+    def __init__(self, *args, func=None, ignores=None, **kwargs):
         """
         Initializes this class, passing unused arguments upstream.
 
         :param func: A function of two arguments with a single return used to combine parent attributes.
                      The default value of None corresponds to the function which returns its second argument.
         :param ignores: An iterable of classes to ignore when merging (can be empty or None).
-        :param use_instances: A boolean dictating whether instance attributes are merged.
-                              If set to True, copies of each parent instance are kept in memory for future look-up.
-                              By default, instance attributes are not merged.
         """
         # Get the MRO as an iterator
         # This pattern is roughly how super() works
@@ -42,36 +35,25 @@ class MixinMerger:
         for cls in mro:
             if cls is MixinMerger:
                 break
-
-        # Create parent instances to use before the actual constructor
-        # All parent classes must be cooperative (or just take the same args) for this to work
-        clits = []
-        for cls in mro:
-            if all(cls is not ignore for ignore in tuple(ignores if ignores is not None else ()) + (object,)):
-                # This pattern expects cooperative parents
-                clits.append((cls, cls(*args, **kwargs) if use_instances else None))
+        mro = [cls for cls in mro if cls not in tuple(ignores or ()) + (object,)]
 
         # Continue the initialization chain
         super().__init__(*args, **kwargs)
-        self.__clits = clits
+        self.__mro = mro
 
         # Set the default merge behavior
-        self.__func = func if func is not None else lambda x, y: y
+        self.__func = func or (lambda x, y: y)
 
     def __getattribute__(self, name):
         # Partition attributes into first, default, and last sections of the call order
         attrs = [[], [], []]
-        for cls, it in object.__getattribute__(self, "_MixinMerger__clits"):
+        for cls in object.__getattribute__(self, "_MixinMerger__mro"):
             try:
                 # Try the class first
                 attr = getattr(cls, name)
             except AttributeError:
-                # Try the instance next (will be None if use_instances is False)
-                try:
-                    attr = getattr(it, name)
-                except AttributeError:
-                    # Guess it's not here
-                    continue
+                # Guess it's not here
+                continue
 
             # Store the desired attribute in the appropriate section
             attrs[getattr(attr, "__merge_order__", 1)] += [(cls, attr)]
