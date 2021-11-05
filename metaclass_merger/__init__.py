@@ -26,20 +26,26 @@ class Merged(type):
         keeps = tuple(set(bases) - set(ignores))
 
         # Collect every non-dunder attribute
-        for attr in (k for k in reduce(operator.or_, (set(dir(base)) for base in keeps)) | set(attrs.keys())
+        for attr in (k for k in set(reduce(operator.add, (dir(base) for base in keeps))) | set(attrs.keys())
                      if not k.startswith("__")):
             ps = [getattr(base, attr) for base in keeps if hasattr(base, attr)]
 
             if all(callable(p) for p in ps):
-                # Respect merge order decorators
+                # Fun flip-flop algorithm to merge ordered methods
                 for order in range(len(ps)):
                     def front(p):
-                        o = vars(p).get("__order", -1)
-                        return (o - order > 0 or o <= -1) - (o - order < 0 <= o)
+                        try:
+                            o = getattr(p, "__order")
+                            return (o - order > 0 or o <= -1) - (o - order < 0 <= o)
+                        except AttributeError:
+                            return 1
 
                     def back(p):
-                        o = vars(p).get("__order", 0)
-                        return (o + order > -1 >= o) - (o + order < -1 or o >= 0)
+                        try:
+                            o = getattr(p, "__order")
+                            return (o + order > -1 >= o) - (o + order < -1 or o >= 0)
+                        except AttributeError:
+                            return -1
 
                     ps.sort(key=front)
                     ps.sort(key=back)
@@ -49,8 +55,10 @@ class Merged(type):
                     self.__ps = psc.copy()
                     self.f = lambda *args, **kwargs: reduce(func, map(lambda f: f(*args, **kwargs), self.__ps))
 
+                # Would make the class callable but that gets oddly messy
                 attrs[attr] = type(attr, (), {"__init__": __init__})(ps).f
             else:
+                # It's just attributes
                 attrs[attr] = reduce(func, ps)
 
             for base in ignores:
