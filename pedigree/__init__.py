@@ -63,6 +63,7 @@ class Pedigree(type):
                 # It's just attributes
                 attrs[attr] = reduce(func, ps)
 
+            # Remove attributes handled by not ignored parents
             for base in ignores:
                 if hasattr(base, attr):
                     delattr(base, attr)

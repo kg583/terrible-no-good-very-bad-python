@@ -87,7 +87,7 @@ class First:
 
 
 class Last:
-    @force(order=0)
+    @force(0)
     def first(self):
         print("I will definitely run first")
 
