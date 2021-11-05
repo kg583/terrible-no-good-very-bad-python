@@ -17,13 +17,20 @@ class Merged(type):
     Iteration order is dictated by the order of the bases parameter
     """
 
-    def __new__(mcs, clsname: str, bases: tuple, attrs: dict, func=None):
-        func = func or (lambda x, y: y)
+    def __new__(mcs, clsname: str, bases: tuple, attrs: dict, func=None, ignores=None):
+        """
 
-        # Collect every non-dunder attribute
-        for attr in (k for k in reduce(operator.or_, (set(vars(base).keys()) for base in bases)) | set(attrs.keys())
+        """
+        func = func or (lambda x, y: y)
+        ignores = ignores or ()
+        keeps = tuple(set(bases) - set(ignores))
+
+        # Collect every non-dunder attribute, even down the MRO
+        for attr in (k for k in reduce(operator.or_, (reduce(operator.or_, (set(vars(m).keys())
+                                                             for m in base.__mro__))
+                                                      for base in keeps)) | set(attrs.keys())
                      if not k.startswith("__")):
-            ps = [getattr(base, attr) for base in bases if attr in vars(base)]
+            ps = [getattr(base, attr) for base in keeps if hasattr(base, attr)]
 
             if all(callable(p) for p in ps):
                 # Respect merge order decorators
@@ -48,9 +55,13 @@ class Merged(type):
             else:
                 attrs[attr] = reduce(func, ps)
 
+            for base in ignores:
+                if hasattr(base, attr):
+                    delattr(base, attr)
+
         # Make the derived class think it knows its parents
         attrs["__bases__"] = bases
-        return super().__new__(mcs, clsname, (), attrs)
+        return super().__new__(mcs, clsname, ignores, attrs)
 
 
 def force(order: int):

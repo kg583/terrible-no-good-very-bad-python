@@ -59,13 +59,21 @@ class Sum(One, Two, Three, metaclass=Merged, func=add):
     pass
 
 
+class SkipSum(One, Two, Three, metaclass=Merged, func=add, ignores=(Three,)):
+    pass
+
+
 gauss = Sum()
 print()
 print(gauss.value)
 
+gauss_but_dumber = SkipSum()
+print(gauss_but_dumber.value)
+
 
 """
 >>> 6
+>>> 4
 """
 
 
@@ -102,4 +110,40 @@ kipchoge.last()
 >>> I will run first
 >>> I will run last
 >>> I will definitely run last
+"""
+
+
+joiner = lambda father, mother: f"Child of {Father.name} and {Mother.name}"
+
+
+class Person:
+    name = "John Doe"
+
+    def say_hello(self) -> str:
+        return f"Hello! I'm {self.name}!"
+
+
+class Father(Person):
+    name = "Donald"
+
+
+class Mother(Person):
+    name = "Grace"
+
+
+class Child(Mother, Father, metaclass=Merged, func=joiner):
+    pass
+
+
+def greeter(person: Person) -> str:
+    return person.say_hello()
+
+
+guido = Child()
+print()
+print(greeter(guido))
+
+
+"""
+>>> Child of Donald and Grace
 """
