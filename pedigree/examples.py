@@ -16,7 +16,7 @@ class Shears:
         print(f"Shearing {yak}!")
 
 
-class YakBarber(Soap, Water, Shears, metaclass=Merged):
+class YakBarber(Soap, Water, Shears, metaclass=Pedigree):
     pass
 
 
@@ -55,11 +55,11 @@ class Three:
 add = lambda x, y: x + y
 
 
-class Sum(One, Two, Three, metaclass=Merged, func=add):
+class Sum(One, Two, Three, metaclass=Pedigree, func=add):
     pass
 
 
-class SkipSum(One, Two, Three, metaclass=Merged, func=add, ignores=(Three,)):
+class SkipSum(One, Two, Three, metaclass=Pedigree, func=add, ignores=(Three,)):
     pass
 
 
@@ -95,7 +95,7 @@ class Last:
         print("I will run last")
 
 
-class Runner(First, Last, metaclass=Merged):
+class Runner(First, Last, metaclass=Pedigree):
     pass
 
 
@@ -131,7 +131,7 @@ class Mother(Person):
     name = "Grace"
 
 
-class Child(Mother, Father, metaclass=Merged, func=joiner):
+class Child(Mother, Father, metaclass=Pedigree, func=joiner):
     pass
 
 
@@ -158,7 +158,7 @@ class Method:
         return arg
 
 
-class Mixed(Value, Method, metaclass=Merged, func=add):
+class Mixed(Value, Method, metaclass=Pedigree, func=add):
     pass
 
 

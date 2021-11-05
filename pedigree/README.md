@@ -1,6 +1,6 @@
 # Why does this exist?
 
-The original problem and first attempt at a solution can be found in the README of `class_merger`. TL;DR: I want to be able to customize multiple inheritance, wherein parent class methods and attributes are combined in some way that isn't just picking the first one found in the MRO. My first attempt involved hacking `__getattribute__`, which has some nice runtime advantages but is also extremely unstable and just generally bad. So, I have since turned to metaclasses with surprisingly good results.
+The original problem and first attempt at a solution can be found in the README of `class_merger`. TL;DR: I want to be able to customize multiple inheritance, wherein parent class methods and attributes are combined in some way that isn't just picking the first one found in the MRO. My first attempt involved hacking `__getattribute__`, which has some nice runtime advantages but is also extremely unstable and just generally bad. So, I have since turned to metaclasses with surprisingly good results; so good I've given this one a proper name: `pedigree`, after the fact it combines a class's entire ancestry.
 
 # Why is this code bad?
 

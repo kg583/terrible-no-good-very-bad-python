@@ -7,7 +7,7 @@ from functools import reduce
 import operator
 
 
-class Merged(type):
+class Pedigree(type):
     """
     A metaclass to "merge" the behavior of multiple parent classes
 
@@ -103,4 +103,4 @@ def force_last(func):
     return force(-1)(func)
 
 
-__all__ = ["Merged", "force", "force_first", "force_last"]
+__all__ = ["Pedigree", "force", "force_first", "force_last"]
