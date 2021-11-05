@@ -30,7 +30,10 @@ class Merged(type):
                      if not k.startswith("__")):
             ps = [getattr(base, attr) for base in keeps if hasattr(base, attr)]
 
-            if all(callable(p) for p in ps):
+            if any(callable(p) for p in ps):
+                # Turn attributes into constant methods
+                ps = [p if callable(p) else lambda *args, **kwargs: p for p in ps]
+
                 # Fun flip-flop algorithm to merge ordered methods
                 for order in range(len(ps)):
                     def front(p):

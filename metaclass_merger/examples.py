@@ -147,3 +147,26 @@ print(greeter(guido))
 """
 >>> Child of Donald and Grace
 """
+
+
+class Value:
+    baz = 420
+
+
+class Method:
+    def baz(self, arg):
+        return arg
+
+
+class Mixed(Value, Method, metaclass=Merged, func=add):
+    pass
+
+
+two_face = Mixed()
+print()
+print(two_face.baz(69))
+
+
+"""
+>>> 489
+"""
