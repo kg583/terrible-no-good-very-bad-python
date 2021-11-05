@@ -25,10 +25,8 @@ class Merged(type):
         ignores = ignores or ()
         keeps = tuple(set(bases) - set(ignores))
 
-        # Collect every non-dunder attribute, even down the MRO
-        for attr in (k for k in reduce(operator.or_, (reduce(operator.or_, (set(vars(m).keys())
-                                                             for m in base.__mro__))
-                                                      for base in keeps)) | set(attrs.keys())
+        # Collect every non-dunder attribute
+        for attr in (k for k in reduce(operator.or_, (set(dir(base)) for base in keeps)) | set(attrs.keys())
                      if not k.startswith("__")):
             ps = [getattr(base, attr) for base in keeps if hasattr(base, attr)]
 
