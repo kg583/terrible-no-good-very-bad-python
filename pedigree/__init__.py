@@ -4,7 +4,6 @@ Metaclass framework for "merging" multiple parent classes, overriding default in
 Examples are included in this package's examples.py.
 """
 from functools import reduce
-import operator
 
 
 class Pedigree(type):
@@ -26,7 +25,7 @@ class Pedigree(type):
         keeps = tuple(set(bases) - set(ignores))
 
         # Collect every non-dunder attribute
-        for attr in (k for k in set(reduce(operator.add, (dir(base) for base in keeps))) | set(attrs.keys())
+        for attr in (k for k in set(sum((dir(base) for base in keeps), [])) | set(attrs.keys())
                      if not k.startswith("__")):
             ps = [getattr(base, attr) for base in keeps if hasattr(base, attr)]
 
