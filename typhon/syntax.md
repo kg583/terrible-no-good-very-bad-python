@@ -150,6 +150,22 @@ c(**b(*a))
 c((b1(a1), b2(a2))
 ```
 
+## Lambdas
+
+```py
+bar = foo(_, 1, 2)
+baz = foo(*_, 4, **_)
+qux = foo(a, b, b, a)
+quy = foo(*c, _, *c)
+
+# become
+
+bar = lambda _: foo(_, 1, 2)
+baz = lambda *_0, **_1: foo(*_0, 4, **_1)
+qux = lambda a, b: foo(a, b, b, a)
+quy = lambda c, _: foo(*c, _, *c)
+```
+
 # Typing
 
 ## Annotations
