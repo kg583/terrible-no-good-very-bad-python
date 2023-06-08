@@ -166,6 +166,25 @@ qux = lambda a, b: foo(a, b, b, a)
 quy = lambda c, _: foo(*c, _, *c)
 ```
 
+# Syntax
+
+## Soft Keywords
+
+```py
+# require identifiers directly after
+async
+class
+def
+del
+func
+global
+import
+meth
+nonlocal
+proc
+static
+```
+
 # Typing
 
 ## Annotations
