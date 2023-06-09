@@ -150,6 +150,21 @@ c(**b(*a))
 c((b1(a1), b2(a2))
 ```
 
+## Decorators
+
+```py
+@cached
+func foo(x):
+    pass
+    
+# becomes
+
+from functools import lru_cache
+@lru_cache
+def foo(x):
+    pass
+```
+
 ## Lambdas
 
 ```py
