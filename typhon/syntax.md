@@ -78,7 +78,7 @@ class Foo:
 
 ```py
 class Foo:
-    meth len(self):
+    meth len():
         pass
         
     meth self(bar):
