@@ -168,6 +168,25 @@ quy = lambda c, _: foo(*c, _, *c)
 
 # Syntax
 
+## Constants
+
+```py
+static PI = 3.14
+PI = 7
+
+# becomes
+
+class _static:
+    def __init__(self):
+        self.__PI = 3.14
+        
+    @property
+    def PI(self):
+        return self.__PI
+        
+_static.PI = 7
+```
+
 ## Soft Keywords
 
 ```py
@@ -181,6 +200,7 @@ global
 import
 meth
 nonlocal
+op
 proc
 static
 ```
