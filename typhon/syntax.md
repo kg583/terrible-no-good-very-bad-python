@@ -183,6 +183,25 @@ quy = lambda c, _: foo(*c, _, *c)
 
 # Syntax
 
+```py
+|val| + 7
+|lst| // 2
+
+# become
+
+abs(val) + 7
+len(lst) // 2
+```
+
+```py
+start..end
+
+# becomes
+
+range(start, end + 1)
+
+```
+
 ## Constants
 
 ```py
