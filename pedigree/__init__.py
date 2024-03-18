@@ -4,6 +4,7 @@ Metaclass framework for "merging" multiple parent classes, overriding default in
 Examples are included in this package's examples.py.
 """
 from functools import reduce
+from inspect import getattr_static
 
 
 class Pedigree(type):
@@ -22,29 +23,34 @@ class Pedigree(type):
         """
         func = func or (lambda x, y: y)
         ignores = ignores or ()
-        keeps = tuple(set(bases) - set(ignores))
+        keeps = tuple(base for base in bases if base not in ignores)
 
         # Collect every non-dunder attribute
         for attr in (k for k in set(sum((dir(base) for base in keeps), [])) | set(attrs.keys())
                      if not k.startswith("__")):
-            ps = [getattr(base, attr) for base in keeps if hasattr(base, attr)]
+            ps = [getattr_static(base, attr) for base in keeps if hasattr(base, attr)]
 
             if any(callable(p) for p in ps):
-                # Turn attributes into constant methods
-                ps = [p if callable(p) else lambda *args, **kwargs: p for p in ps]
+                def __init__(self, pc):
+                    self.__func__ = pc
+
+                # Turn attributes into constant methods and special methods into less special methods
+                ps = [p if hasattr(p, "__func__") else
+                      type("", (), {"__init__": __init__})(p if callable(p) else lambda *args, **kwargs: p)
+                      for p in ps]
 
                 # Fun flip-flop algorithm to merge ordered methods
                 for order in range(len(ps)):
                     def front(p):
                         try:
-                            o = getattr(p, "__order")
+                            o = getattr(p.__func__, "__order")
                             return (o - order > 0 or o <= -1) - (o - order < 0 <= o)
                         except AttributeError:
                             return 1
 
                     def back(p):
                         try:
-                            o = getattr(p, "__order")
+                            o = getattr(p.__func__, "__order")
                             return (o + order > -1 >= o) - (o + order < -1 or o >= 0)
                         except AttributeError:
                             return -1
@@ -52,13 +58,22 @@ class Pedigree(type):
                     ps.sort(key=front)
                     ps.sort(key=back)
 
+                # Determine if self needs to be passed to the methods
+                def caller(f):
+                    if isinstance(f, staticmethod):
+                        return lambda *args, **kwargs: f.__func__(*args[1:], **kwargs)
+
+                    else:
+                        return f.__func__
+
                 # Make a dynamic class to hold onto the parents
                 def __init__(self, psc: list):
                     self.__ps = psc.copy()
-                    self.f = lambda *args, **kwargs: reduce(func, map(lambda f: f(*args, **kwargs), self.__ps))
+                    self.__func__ = lambda *args, **kwargs: \
+                        reduce(func, map(lambda f: caller(f)(*args, **kwargs), self.__ps))
 
                 # Would make the class callable but that gets oddly messy
-                attrs[attr] = type(attr, (), {"__init__": __init__})(ps).f
+                attrs[attr] = type("", (), {"__init__": __init__})(ps).__func__
             else:
                 # It's just attributes
                 attrs[attr] = reduce(func, ps)

@@ -8,8 +8,6 @@ Metaclasses are dangerous. They can overwrite every fundamental assumption you h
 
 # Why is this code not not good?
 
-Even less abhorrent than its mixin-based predecessor, this packages also does exactly what it says on the tin, and this time actually seamlessly through the power of metaclasses. Certain edge cases and conveniences that were possible through the mixin variety are no longer available, which increases stability and reduces overall complexity.
-
-Most importantly, though, just as with the mixin, use of this package advocates for the general concept of "additive" or "merged" inheritance in a natural way. Container classes or similar patterns are usually the solution when presented with such a conundrum, but have major flaws as previously discussed.
+Even less abhorrent than its mixin-based predecessor, this packages also does exactly what it says on the tin, and this time actually seamlessly through the power of metaclasses. And just as with the mixin, use of this package advocates for the general concept of "additive" or "merged" inheritance in a natural way. Container classes or similar patterns are usually the solution when presented with such a conundrum, but have major flaws as previously discussed.
 
 I would prefer you use this code over the mixin at this point, and that probably means the documentation here should be more completely ported over rather than just telling you to go read about obsolete code instead. Then again, its unlikely this content will *ever* see the light of day in a practical context, so if you've found your way over here you probably don't even care.

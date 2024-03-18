@@ -2,12 +2,14 @@ from __init__ import *
 
 
 class Soap:
-    def shave(self, yak):
+    @staticmethod
+    def shave(yak):
         print(f"Washing {yak}!")
 
 
 class Water:
-    def shave(self, yak):
+    @classmethod
+    def shave(cls, yak):
         print(f"Rinsing {yak}!")
 
 
@@ -78,20 +80,24 @@ print(gauss_but_dumber.value)
 
 
 class First:
-    def first(self):
+    @staticmethod
+    def first():
         print("I will run first")
 
+    @staticmethod
     @force_last
-    def last(self):
+    def last():
         print("I will definitely run last")
 
 
 class Last:
+    @staticmethod
     @force(0)
-    def first(self):
+    def first():
         print("I will definitely run first")
 
-    def last(self):
+    @staticmethod
+    def last():
         print("I will run last")
 
 
@@ -158,7 +164,7 @@ class Method:
         return arg
 
 
-class Mixed(Value, Method, metaclass=Pedigree, func=add):
+class Mixed(Method, Value, metaclass=Pedigree, func=add):
     pass
 
 
