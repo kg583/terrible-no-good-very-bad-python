@@ -31,6 +31,7 @@ class Pedigree(type):
             ps = [getattr_static(base, attr) for base in keeps if hasattr(base, attr)]
 
             if any(callable(p) for p in ps):
+                # Wrapper for things without funk
                 def __init__(self, pc):
                     self.__func__ = pc
 
@@ -58,19 +59,19 @@ class Pedigree(type):
                     ps.sort(key=front)
                     ps.sort(key=back)
 
-                # Determine if self needs to be passed to the methods
-                def caller(f):
+                # Determine if self needs to be yoinked
+                def caller(f, *args, **kwargs):
                     if isinstance(f, staticmethod):
-                        return lambda *args, **kwargs: f.__func__(*args[1:], **kwargs)
+                        return f.__func__(*args[1:], **kwargs)
 
                     else:
-                        return f.__func__
+                        return f.__func__(*args, **kwargs)
 
                 # Make a dynamic class to hold onto the parents
                 def __init__(self, psc: list):
                     self.__ps = psc.copy()
                     self.__func__ = lambda *args, **kwargs: \
-                        reduce(func, map(lambda f: caller(f)(*args, **kwargs), self.__ps))
+                        reduce(func, map(lambda f: caller(f, *args, **kwargs), self.__ps))
 
                 # Would make the class callable but that gets oddly messy
                 attrs[attr] = type("", (), {"__init__": __init__})(ps).__func__
