@@ -17,20 +17,19 @@ class Pedigree(type):
     Iteration order is dictated by the order of the bases parameter
     """
 
-    def __new__(mcs, clsname: str, bases: tuple, attrs: dict, func=None, ignores=None):
-        """
-
-        """
+    def __new__(mcs, clsname: str, bases: tuple, attrs: dict, func=None, ignores=None, dunders=None):
         func = func or (lambda x, y: y)
         ignores = ignores or ()
         keeps = tuple(base for base in bases if base not in ignores)
+        dunders = dunders or ()
 
         # Collect every non-dunder attribute
         for attr in (k for k in set(sum((dir(base) for base in keeps), [])) | set(attrs.keys())
-                     if not k.startswith("__")):
+                     if not k.startswith("__") or k in dunders):
             ps = [getattr_static(base, attr) for base in keeps if hasattr(base, attr)]
 
-            if any(callable(p) for p in ps):
+            # Something's callable
+            if any(callable(p) or hasattr(p, "__func__") for p in ps):
                 # Wrapper for things without funk
                 def __init__(self, pc):
                     self.__func__ = pc
