@@ -42,18 +42,12 @@ class Pedigree(type):
                 # Fun flip-flop algorithm to merge ordered methods
                 for order in range(len(ps)):
                     def front(p):
-                        try:
-                            o = getattr(p.__func__, "__order")
-                            return (o - order > 0 or o <= -1) - (o - order < 0 <= o)
-                        except AttributeError:
-                            return 1
+                        o = getattr(p.__func__, "__order", -1)
+                        return (o - order > 0 or o <= -1) - (o - order < 0 <= o)
 
                     def back(p):
-                        try:
-                            o = getattr(p.__func__, "__order")
-                            return (o + order > -1 >= o) - (o + order < -1 or o >= 0)
-                        except AttributeError:
-                            return -1
+                        o = getattr(p.__func__, "__order", 0)
+                        return (o + order > -1 >= o) - (o + order < -1 or o >= 0)
 
                     ps.sort(key=front)
                     ps.sort(key=back)
